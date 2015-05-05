@@ -1,0 +1,77 @@
+#include <QMainWindow>
+#include <QPlainTextEdit>
+#include <QFile>
+namespace Ui {
+class MainWindow;
+}
+
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+   
+public:
+    explicit MainWindow(QWidget *parent = 0);
+    ~MainWindow();
+   
+private:
+    QPlainTextEdit * editor;
+    QString url; 
+    Ui::MainWindow *ui;
+    void savefile(QString url);
+    void svaefileas();
+    void savefile();
+    void openfile();
+    void newfile();
+};
+
+
+void MainWindow::openfile()
+{
+    QString openfileurl = QFileDialog::getOpenFileName();
+    if(openfileurl.isEmpty() || openfileurl == url) return;
+    QFile file(openfileurl);
+        if(file.open(QIODevice::ReadOnly|QIODevice::Text))
+        {
+        url = openfileurl;
+        editor->setPlainText(QString::fromUtf8(file.readAll()));
+        }
+}
+
+void MainWindow::savefile()
+{
+    if(url.isEmpty()){savefileas(); return;}
+    QFile file(url);
+    if(file.open(QIODevice::WriteOnly|QIODevice::Text))
+    {
+    file.write(editor->toPlainText().toUtf8());
+    }
+}
+
+void MainWindow::savefileas()
+{
+    QString url = QFileDialog::getSaveFileName();
+    savefile(url);
+}
+
+void MainWindow::savefile(QString fileurl)
+{
+    QFile file(fileurl);
+    if(file.open(QIODevice::WriteOnly|QIODevice::Text))
+    {
+    file.write(editor->toPlainText().toUtf8());
+    url = fileurl;
+    }
+} 
+ void MainWindow::on_actionSave_file_triggered()
+{
+    savefile();
+}
+
+void MainWindow::on_actionAbout_triggered()
+{
+    QMessageBox::information(this , tr("about") , tr("this is a basic text editor "));
+}
+void MainWindow::on_actionOpen_triggered()
+{
+    openfile();
+}
